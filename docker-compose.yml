@@ -1,0 +1,19 @@
+services:
+  arranger:
+    build: .
+    container_name: arranger
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    volumes:
+      - ./config:/config
+      - ./data:/data
+      - ./logs:/logs
+    environment:
+      - ARRANGER_CONFIG=/config/arranger.yaml
+    networks:
+      - arr-network
+
+networks:
+  arr-network:
+    external: true

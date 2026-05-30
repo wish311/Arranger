@@ -1,0 +1,11 @@
+{% extends "ui/base.html" %}{% block title %}Arranger Dashboard{% endblock %}{% block heading %}Dashboard{% endblock %}
+{% block content %}
+<div class="grid cards">
+  <div class="card"><h3>Pending Moves</h3><div class="metric">{{ counts.get('pending',0) + counts.get('approved',0) }}</div><p class="muted">Manual approval workflow is {{ 'enabled' if settings.app.manual_approval else 'disabled' }}.</p></div>
+  <div class="card"><h3>Safety Blocks</h3><div class="metric">{{ counts.get('blocked',0) }}</div><p class="muted">Sonarr and Radarr safety gates blocked these decisions.</p></div>
+  <div class="card"><h3>Completed</h3><div class="metric">{{ counts.get('completed',0) }}</div><p class="muted">Moves completed through Arr APIs.</p></div>
+  <div class="card"><h3>Scheduler</h3><span class="badge {{ 'connected' if settings.scheduler.enabled else 'error' }}">{{ 'Enabled' if settings.scheduler.enabled else 'Disabled' }}</span><p class="muted">Audit every {{ settings.scheduler.audit_interval_minutes }} minutes.</p></div>
+</div><br>
+<div class="card"><h2>Quick Actions</h2><div class="actions"><button class="primary" onclick="runAudit('all')">Run Full Audit</button><button onclick="runAudit('radarr')">Run Radarr Audit</button><button onclick="runAudit('sonarr')">Run Sonarr Audit</button><a class="btn" href="/ui/queue">View Queue</a><a class="btn" href="/ui/history">View History</a><a class="btn" href="/ui/settings">Open Settings</a></div></div><br>
+<div class="card"><h2>Recent Activity</h2>{% if recent_records %}<table class="table"><tr><th>App</th><th>Title</th><th>Status</th><th>Reason</th></tr>{% for r in recent_records %}<tr><td>{{ r.app }}</td><td>{{ r.title }}</td><td><span class="badge {{ r.status }}">{{ r.status }}</span></td><td>{{ r.reason }}</td></tr>{% endfor %}</table>{% else %}<div class="empty">No history yet. Run your first dry-run audit.</div>{% endif %}</div>
+{% endblock %}
