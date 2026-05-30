@@ -5,6 +5,9 @@ app:
   database_path: /data/arranger.db
   bind_host: 0.0.0.0
   bind_port: 8787
+  ui_auth_enabled: false
+  ui_username: admin
+  ui_password_hash: CHANGE_ME
 
 radarr:
   enabled: true

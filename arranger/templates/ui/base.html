@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Arranger{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">⇄</div><div><h1>Arranger</h1><p class="tagline">Smart folder automation for the Arr stack.</p></div></div>
+    <nav class="nav">
+      {% for href,label in [('/ui','Dashboard'),('/ui/queue','Queue'),('/ui/history','History'),('/ui/rules','Rules'),('/ui/settings','Settings'),('/ui/logs','Logs'),('/ui/help','Help')] %}
+      <a href="{{ href }}" class="{% if page == label|lower %}active{% endif %}">{{ label }}</a>
+      {% endfor %}
+      <a href="/ui/onboarding" class="{% if page == 'onboarding' %}active{% endif %}">Onboarding</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div><strong>{% block heading %}Arranger{% endblock %}</strong><div class="muted">API-only media folder orchestration</div></div>
+      <div class="badges">
+        <span class="badge {{ 'dry' if settings.app.dry_run else 'live' }}">{{ 'Dry Run' if settings.app.dry_run else 'Live Mode' }}</span>
+        <span class="badge {{ 'connected' if settings.radarr and settings.radarr.enabled else 'error' }}">Radarr {{ 'Enabled' if settings.radarr and settings.radarr.enabled else 'Disabled' }}</span>
+        <span class="badge {{ 'connected' if settings.sonarr and settings.sonarr.enabled else 'error' }}">Sonarr {{ 'Enabled' if settings.sonarr and settings.sonarr.enabled else 'Disabled' }}</span>
+      </div>
+    </div>
+    {% if auth_warning %}<div class="warning">UI authentication is disabled. Enable optional auth in Settings before exposing Arranger beyond a trusted LAN.</div><br>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

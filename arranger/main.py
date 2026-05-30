@@ -2,10 +2,14 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
+from arranger.api.management import create_management_router
 from arranger.api.routes import create_router
+from arranger.api.ui import create_ui_router
 from arranger.clients.radarr import RadarrClient
 from arranger.clients.sonarr import SonarrClient
 from arranger.config import load_settings
@@ -52,7 +56,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Arranger", version="0.1.0", lifespan=lifespan)
+    static_dir = Path(__file__).resolve().parent / "static"
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
     app.include_router(create_router())
+    app.include_router(create_management_router())
+    app.include_router(create_ui_router())
     return app
 
 

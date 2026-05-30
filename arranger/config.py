@@ -21,6 +21,9 @@ class AppConfig(BaseModel):
     download_temp_paths: list[str] = Field(
         default_factory=lambda: ["/downloads", "/download", "/tmp"]
     )
+    ui_auth_enabled: bool = False
+    ui_username: str = "admin"
+    ui_password_hash: str = "CHANGE_ME"
 
 
 class ArrConfig(BaseModel):

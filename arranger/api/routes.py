@@ -70,7 +70,11 @@ def create_router() -> APIRouter:
         return db.list_records()
 
     @router.post("/queue/{record_id}/approve")
-    async def approve(record_id: int, db: Database = Depends(get_db)) -> dict[str, Any]:
+    async def approve(
+        record_id: int, request: Request, db: Database = Depends(get_db)
+    ) -> dict[str, Any]:
+        if request.app.state.settings.app.dry_run:
+            raise HTTPException(409, "Dry-run is enabled; approval for real moves is blocked")
         if not db.get_record(record_id):
             raise HTTPException(404, "Queue record not found")
         db.update_status(record_id, MoveStatus.APPROVED, "Manually approved")
@@ -82,6 +86,18 @@ def create_router() -> APIRouter:
             raise HTTPException(404, "Queue record not found")
         db.update_status(record_id, MoveStatus.CANCELED, "Manually canceled")
         return {"id": record_id, "status": MoveStatus.CANCELED.value}
+
+    @router.post("/queue/{record_id}/recheck")
+    async def recheck(
+        record_id: int, request: Request, db: Database = Depends(get_db)
+    ) -> dict[str, Any]:
+        record = db.get_record(record_id)
+        if not record:
+            raise HTTPException(404, "Queue record not found")
+        audit: AuditService = request.app.state.audit_service
+        if record["app"] == "radarr":
+            return await audit.audit_radarr(int(record["media_id"]))
+        return await audit.audit_sonarr(int(record["media_id"]))
 
     @router.post("/webhook/radarr")
     async def webhook_radarr(

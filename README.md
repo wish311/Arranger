@@ -209,3 +209,81 @@ Do not use download/temp folders as library root folders. Arranger also checks `
 ## Current API assumptions to verify on your live instance
 
 Radarr and Sonarr v3/v4 commonly use `/api/v3` endpoints and support `moveFiles=true` on item update. Arranger validates this against your running instance before recording success, but you should test with dry-run and a low-risk item before bulk real moves.
+
+## Web UI
+
+Arranger now includes a dark, Arr-style web UI served by the same FastAPI process. Open:
+
+```bash
+http://localhost:8787/ui
+```
+
+The UI is self-contained and does not require an external frontend build step or internet-hosted assets. It uses server-rendered Jinja2 templates plus small local CSS/JavaScript assets.
+
+### UI onboarding
+
+Open `/ui/onboarding` to walk through:
+
+1. Welcome and API-only safety overview.
+2. Radarr URL/API key connection test.
+3. Sonarr URL/API key connection test.
+4. Root-folder discovery and rule planning.
+5. Safety settings review, including Sonarr safety mode and move cooldown.
+6. First dry-run audit.
+
+Dry-run remains enabled by default throughout onboarding. Onboarding cannot bypass queue or safety checks.
+
+### Connecting Radarr and Sonarr in the UI
+
+Use **Settings** or **Onboarding** to enter the service URL and API key, then click **Test Connection**. The backend calls the live Arr health endpoints and returns either version/status details or a clear connection error. Saved config continues to live in `config/arranger.yaml` so advanced users can still hand-edit YAML.
+
+### Running the first dry-run from the UI
+
+From **Dashboard** or **Onboarding**, click **Run Full Audit**. Arranger records decisions as `dry_run`, `blocked`, `pending`, or `approved` records. While `dry_run` is true, approve buttons are disabled and backend approval also returns an error.
+
+### Managing rules visually
+
+The **Rules** page lists Radarr and Sonarr rules, priorities, default status, matching genres/tags/certifications/title regex, and target roots. The rules API validates common operator mistakes such as equal-priority overlapping rules, missing default rules, and target roots that are not in discovered root folders.
+
+### Queue, history, logs, and help pages
+
+- **Queue** shows pending, blocked, approved, and running records with app, title, current path, target root, matched rule, status, reason, and actions.
+- **History** shows completed, failed, dry-run, and blocked decisions with simple search/filter controls.
+- **Logs** shows recent log lines with level and app filters.
+- **Help** explains dry-run mode, API-only moves, Sonarr future episode behavior, webhooks, and troubleshooting.
+
+### Enabling live mode from the UI
+
+The **Settings** page includes a red danger zone for live moves. If you turn off dry-run, Arranger prompts for the exact confirmation phrase:
+
+```text
+ENABLE LIVE MOVES
+```
+
+Without that phrase, `/api/config` rejects the change. Manual approval is strongly recommended for live mode.
+
+### Optional UI authentication
+
+UI auth is optional for trusted LAN deployments and disabled by default. Configure it under `app`:
+
+```yaml
+app:
+  ui_auth_enabled: true
+  ui_username: admin
+  ui_password_hash: sha256$<hash>
+```
+
+Arranger never needs a plain-text password in YAML. If auth is disabled, the UI displays a warning banner. For production internet exposure, place Arranger behind a trusted reverse proxy or VPN and enable authentication.
+
+### Screenshots / page descriptions
+
+No generated screenshots are committed, but the UI pages are:
+
+- Dashboard: health, queue, safety block, scheduler, and recent activity cards.
+- Onboarding: six-step setup wizard.
+- Queue: move review table with disabled approval during dry-run.
+- History: searchable decision history.
+- Rules: visual rule listing and add-rule form.
+- Settings: app, Arr connection, Sonarr safety, move queue, webhook, and live-mode controls.
+- Logs: recent log viewer.
+- Help: built-in operational guide.
