@@ -1,0 +1,84 @@
+app:
+  name: Arranger
+  dry_run: true
+  log_level: info
+  database_path: /data/arranger.db
+  bind_host: 0.0.0.0
+  bind_port: 8787
+
+radarr:
+  enabled: true
+  url: http://radarr:7878
+  api_key: CHANGE_ME
+  webhook_secret: CHANGE_ME_OPTIONAL
+
+sonarr:
+  enabled: true
+  url: http://sonarr:8989
+  api_key: CHANGE_ME
+  webhook_secret: CHANGE_ME_OPTIONAL
+
+rules:
+  radarr:
+    - name: Kids Movies
+      priority: 100
+      match_genres:
+        - Animation
+        - Family
+        - Children
+      match_certifications:
+        - G
+        - PG
+      target_root: /media/movies/kids
+
+    - name: General Movies
+      priority: 1
+      default: true
+      target_root: /media/movies/general
+
+  sonarr:
+    - name: Kids TV
+      priority: 100
+      match_genres:
+        - Animation
+        - Family
+        - Children
+        - Kids
+      target_root: /media/tv/kids
+
+    - name: General TV
+      priority: 1
+      default: true
+      target_root: /media/tv/general
+
+sonarr_move_safety:
+  enabled: true
+  mode: all_available_episodes
+  require_no_active_downloads: true
+  require_no_missing_monitored_episodes: true
+  require_series_refresh_before_check: true
+  delay_after_last_import_minutes: 30
+  block_if_series_continuing: false
+  allow_move_if_continuing_but_all_available_complete: true
+
+move_queue:
+  enabled: true
+  max_concurrent_moves: 1
+  cooldown_seconds: 60
+  retry_failed_after_minutes: 60
+  max_attempts: 3
+
+scheduler:
+  enabled: true
+  audit_interval_minutes: 60
+  pending_move_check_minutes: 30
+
+logging:
+  file: /logs/arranger.log
+  log_decisions: true
+  log_skipped_items: true
+  log_api_errors: true
+
+webhooks:
+  enabled: true
+  require_secret: false
